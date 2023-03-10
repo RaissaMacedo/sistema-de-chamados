@@ -4,6 +4,9 @@ import SignUp from '../pages/SignUp';
 import SignIn from '../pages/SignIn';
 import Dashboard from '../pages/Dashboard';
 import Profile from '../pages/Profile';
+import Customers from '../pages/Customers';
+import New from '../pages/New';
+
 import Private from './Private';
 
 function RoutesApp() {
@@ -24,6 +27,22 @@ function RoutesApp() {
         element={
           <Private>
             <Profile />
+          </Private>
+        }
+      />
+      <Route
+        path="/customers"
+        element={
+          <Private>
+            <Customers />
+          </Private>
+        }
+      />
+      <Route
+        path="/new"
+        element={
+          <Private>
+            <New />
           </Private>
         }
       />
