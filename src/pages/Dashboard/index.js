@@ -24,6 +24,8 @@ export default function Dashboard() {
   const [chamados, setChamados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
+  const [lastDocs, setLastDocs] = useState();
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     async function loadChamados() {
@@ -57,12 +59,26 @@ export default function Dashboard() {
           complemento: doc.data().complemento,
         });
       });
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1]; // pegando o ultimo item
       setChamados((chamados) => [...chamados, ...lista]); // mantendo o que já tem e colocando a mais na lista
+      setLastDocs(lastDoc); // qual ultimo item que esta sendo renderizado
     } else {
       setIsEmpty(true);
     }
+    setLoadingMore(false);
   }
+  async function handleMore() {
+    setLoadingMore(true);
 
+    const q = query(
+      listRef,
+      orderBy('created', 'desc'),
+      startAfter(lastDocs),
+      limit(5),
+    );
+    const querySnapshot = await getDocs(q); // fazendo a requisição
+    await updateState(querySnapshot);
+  }
   if (loading) {
     return (
       <div>
@@ -119,7 +135,10 @@ export default function Dashboard() {
                         <td data-label="Status">
                           <span
                             className="badge"
-                            style={{ backgroundColor: '#999' }}
+                            style={{
+                              backgroundColor:
+                                item.status === 'Aberto' ? '#5cb85c' : '#999',
+                            }}
                           >
                             {item.status}
                           </span>
@@ -132,18 +151,25 @@ export default function Dashboard() {
                           >
                             <FiSearch color="#fff" size={17} />
                           </button>
-                          <button
+                          <Link
+                            to={`/new/${item.id}`}
                             className="action"
                             style={{ backgroundColor: '#f6a935' }}
                           >
                             <FiEdit2 color="#FFF" size={17} />
-                          </button>
+                          </Link>
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
+              {loadingMore && <h3>Buscando mais chamados...</h3>}
+              {!loadingMore && !isEmpty && (
+                <button className="btn-more" onClick={handleMore}>
+                  Buscar mais
+                </button>
+              )}
             </>
           )}
         </>
